@@ -41,12 +41,9 @@ bool checkMutation(string pattern, string temp){
             error++;
         }
         if(error>5){
-            cout << "error = "<<error<<" return false"<<endl;
             return false;
         }
     }
-    cout << "error = "<<error<<"return true"<<endl;
-
     return true;
 }
 char mapChar(int value){
@@ -193,33 +190,61 @@ int main(int argc, const char * argv[]) {
     int isＭutate;
     
     for(int j=0;j<=985;j++){
-        cout <<"j = "<<j<<endl;
-        isＭutate=0;
+        isＭutate=1;
         
         string temp = line[0].substr(j,15);
-        cout << "temp is = "<<temp<<endl;
-        cout <<"fuck you"<<endl;
+        //cout << "temp is = "<<temp<<endl;
 
         for(int k=0;k<=985;k++){
             string compare_temp=line[1].substr(k,15);
-            cout << "temp = "<<temp<<" compare = "<<compare_temp<<endl;
-            if(j!=k && checkMutation(temp, compare_temp)){
-                isＭutate=1;
-                cout <<"k = "<<k<<" in break"<<endl;
+            //cout << "temp = "<<temp<<" compare = "<<compare_temp<<endl;
+            if(checkMutation(temp, compare_temp)){
+                isＭutate=0;
                 break;
-            }else{
-                cout<<"k = "<<k<<" not break"<<endl;
             }
         }
         if(isＭutate==0){
             pattern[temp]=1;
         }
        
-        cout <<"fuck you"<<endl;
     }
     
     
     map<string, int>::iterator iter;
+    cout <<"pattern size "<<pattern.size()<<endl;
+
+    /*for(iter = pattern.begin(); iter != pattern.end(); iter++){
+        cout << "pattern is = "<<iter->first <<endl;
+        
+    }*/
+    int line_num=2;
+    int end=0;
+    
+    while(line_num<20){
+        cout <<"pattern size "<<pattern.size()<<"line num= "<<line_num<<endl;
+        for(iter = pattern.begin();iter!=pattern.end();iter++){
+            isＭutate=1;
+            for(int k=0;k<=985;k++){
+                string compare_temp=line[line_num].substr(k,15);
+                cout <<"line is "<<line_num<<" k is = "<<k<<" pattern is = "<<iter->first<<endl;
+                if(checkMutation(iter->first, compare_temp)){
+                    isＭutate=0;
+                    break;
+                }
+            }
+            if(isＭutate==0){
+                cout <<"in isMutate=0"<<endl;
+                pattern[iter->first]=1;
+            }else if(isＭutate==1){
+                cout <<"in isMutate=1"<<endl;
+                pattern.erase(iter->first);
+            }
+
+        }
+        line_num++;
+        
+    }
+    cout << "out while"<<endl;
     cout <<"pattern size "<<pattern.size()<<endl;
 
     for(iter = pattern.begin(); iter != pattern.end(); iter++){
