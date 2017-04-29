@@ -17,6 +17,9 @@
 
 using namespace std;
 int last=-1;
+//map<string, int> pattern;
+string geno_line[1000];
+
 
 
 
@@ -40,11 +43,55 @@ bool checkMutation(string pattern, string temp){
         if(pattern[j]!=temp[j]){
             error++;
         }
-        if(error>5){
-            return false;
+    }
+    //cout <<"error = "<<error<<endl;
+    if(error==10){
+        //cout << "checkmutation return true"<<endl;
+        return true;
+    }
+    
+    return false;
+}
+void createString(map<string,int> &pattern,string pattern1,string pattern2){
+    //cout << "in createstring"<<endl;
+    
+    
+    int error=0;
+    string temp1=pattern1;
+    string temp2=pattern2;
+    for(int j=0;j<15;j++){   // pattern1 換成 pattern2  pattern1保留後面
+        if(temp1[j]!=temp2[j]){
+            error++;
+            if(error<6){
+                temp1[j]=temp2[j];
+            }else{
+                if(pattern.find(temp1)==pattern.end()){  // not find in pattern
+                    //cout<<"in add to pattern"<<endl;
+                    pattern[temp1]=1;
+                }
+                break;
+            }
         }
     }
-    return true;
+    error=0;
+    temp1=pattern1;
+    temp2=pattern2;
+    for(int j=0;j<15;j++){   // pattern1 換成 pattern2  pattern2保留後面
+        if(temp1[j]!=temp2[j]){
+            error++;
+            if(error<6){
+                temp2[j]=temp1[j];
+            }else{
+                if(pattern.find(temp2)==pattern.end()){  // not find in pattern
+                    //cout<<"in add to pattern"<<endl;
+                    pattern[temp2]=1;
+                }
+                break;
+            }
+        }
+    }
+    
+    
 }
 char mapChar(int value){
     
@@ -116,18 +163,105 @@ string createRandomPattern(int a, int t ,int c ,int g){
 
     return pattern2;
 }
+void findMin(map<string,int>&temp_pattern,string pattern,int pos){
+    
+    int min_score=10000;
+    string min_pattern;
+    
+   
+    cout <<"in finMin, pattern is = "<<pattern<<" pos is = "<<pos<<endl;
+    for(int alpha=4;alpha>0;alpha--){
+        int score_f=0;
+        int score_b=0;
+        int score=0;
+        string temp=pattern;
+        if(alpha==4){
+            temp[pos]='A';
+        }else if(alpha==3){
+            temp[pos]='T';
+        }else if(alpha==2){
+            temp[pos]='C';
+        }else if(alpha==1){
+            temp[pos]='G';
+        }
+        for(int k=0;k<1000;k++){
+            if(geno_line[k].find(temp.substr(0,15))!=string::npos){
+                score_f=score_f+64;
+            }
+            if(geno_line[k].find(temp.substr(0,14))!=string::npos){
+                score_f=score_f+32;
+            }
+            if(geno_line[k].find(temp.substr(0,13))!=string::npos){
+                score_f=score_f+16;
+            }
+            if(geno_line[k].find(temp.substr(0,12))!=string::npos){
+                score_f=score_f+8;
+            }
+            if(geno_line[k].find(temp.substr(0,11))!=string::npos){
+                score_f=score_f+4;
+            }
+            if(geno_line[k].find(temp.substr(0,10))!=string::npos){
+                score_f=score_f+2;
+            }
+            if(geno_line[k].find(temp.substr(0,9))!=string::npos){
+                score_f=score_f+1;
+            }
+            if(geno_line[k].find(temp.substr(1,15))!=string::npos){
+                score_b=score_b+64;
+            }
+            if(geno_line[k].find(temp.substr(2,15))!=string::npos){
+                score_b=score_b+32;
+            }
+            if(geno_line[k].find(temp.substr(3,15))!=string::npos){
+                score_b=score_b+16;
+            }
+            if(geno_line[k].find(temp.substr(4,15))!=string::npos){
+                score_b=score_b+8;
+            }
+            if(geno_line[k].find(temp.substr(5,15))!=string::npos){
+                score_b=score_b+4;
+            }
+            if(geno_line[k].find(temp.substr(6,15))!=string::npos){
+                score_b=score_b+2;
+            }
+            if(geno_line[k].find(temp.substr(7,15))!=string::npos){
+                score_b=score_b+1;
+            }
+        }
+        score=score_f+score_b;
+
+        cout <<"in finMin mutate pattern is = "<<temp<<" score is = "<<score<<endl;
+        temp_pattern[temp]=score;
+
+        if(score<min_score){
+            min_score=score;
+            min_pattern=temp;
+        }
+
+        
+    }
+    //cout << "min_string = "<<min_pattern<<endl;
+    //return min_pattern;
+    
+}
+
+
+
 
 int main(int argc, const char * argv[]) {
 
     ifstream inputFile1,inputFile2,inputFile3;
     inputFile1.open("/Users/sam/Desktop/course/AI/ai_hw1/ai_hw1/q1.data",ifstream::in);
     inputFile2.open("/Users/sam/Desktop/course/AI/ai_hw1/ai_hw1/ex1_5_mutates.data",ifstream::in);
+    inputFile3.open("/Users/sam/Desktop/course/AI/ai_hw1/ai_hw1/genome.data",ifstream::in);
+
 
     string temp_line;
     string line[50];
+    //string geno_line[1000];
+
     int i=0;
     map<string, int> pattern;
-    
     cout << "---q1----"<<endl;
 
 
@@ -177,83 +311,48 @@ int main(int argc, const char * argv[]) {
     /*question2*/
     cout << "---q2----"<<endl;
     i=0;
-    map<char,int>count;
+
     while(getline(inputFile2,temp_line))
     {
         line[i]=temp_line.substr(0,temp_line.length()-1);
         i++;
     }
+    
+    i=0;
+    
+    while(getline(inputFile3,temp_line))
+    {
+        geno_line[i]=temp_line.substr(0,temp_line.length()-1);
+        i++;
+    }
+    string start;
+
+    for(int j=0;j<985;j++){
+        string temp=line[0].substr(j,15);
+        if(temp[0]=='G'){
+            start=temp;
+            break;
+        }
+    }
 
    
-    //int max =-100;
     string max_s;
-    int isＭutate;
     
-    for(int j=0;j<=985;j++){
-        isＭutate=1;
-        
-        string temp = line[0].substr(j,15);
-        //cout << "temp is = "<<temp<<endl;
-
-        for(int k=0;k<=985;k++){
-            string compare_temp=line[1].substr(k,15);
-            //cout << "temp = "<<temp<<" compare = "<<compare_temp<<endl;
-            if(checkMutation(temp, compare_temp)){
-                isＭutate=0;
-                break;
-            }
-        }
-        if(isＭutate==0){
-            pattern[temp]=1;
-        }
-       
+    for(int j=0;j<15;j++){
+        cout <<"j is = "<<j<<endl;
+        findMin(pattern,start, j);
     }
     
+    cout <<"start is = "<<start<<endl;
     
     map<string, int>::iterator iter;
     cout <<"pattern size "<<pattern.size()<<endl;
 
-    /*for(iter = pattern.begin(); iter != pattern.end(); iter++){
-        cout << "pattern is = "<<iter->first <<endl;
-        
-    }*/
-    int line_num=2;
-    int end=0;
-    
-    while(line_num<20){
-        cout <<"pattern size "<<pattern.size()<<"line num= "<<line_num<<endl;
-        for(iter = pattern.begin();iter!=pattern.end();iter++){
-            isＭutate=1;
-            for(int k=0;k<=985;k++){
-                string compare_temp=line[line_num].substr(k,15);
-                cout <<"line is "<<line_num<<" k is = "<<k<<" pattern is = "<<iter->first<<endl;
-                if(checkMutation(iter->first, compare_temp)){
-                    isＭutate=0;
-                    break;
-                }
-            }
-            if(isＭutate==0){
-                cout <<"in isMutate=0"<<endl;
-                pattern[iter->first]=1;
-            }else if(isＭutate==1){
-                cout <<"in isMutate=1"<<endl;
-                pattern.erase(iter->first);
-            }
-
-        }
-        line_num++;
-        
-    }
-    cout << "out while"<<endl;
-    cout <<"pattern size "<<pattern.size()<<endl;
-
     for(iter = pattern.begin(); iter != pattern.end(); iter++){
-        cout << "pattern is = "<<iter->first <<endl;
+            cout << "pattern is = "<<iter->first <<endl;
         
     }
-    
-    
-
+   
     
     
     
